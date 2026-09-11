@@ -49,3 +49,5 @@ Thumbs.db
 .local/
 .config/
 .conversation/
+.neon
+.env.local

@@ -26,15 +26,27 @@ app.use(
     },
   }),
 );
+
+// Build allowed origins from ALLOWED_ORIGINS env var
+// Set this in Render to your frontend URL(s), comma-separated
+// e.g. "https://farrez.vercel.app,https://farrez.com"
 const allowedOrigins = new Set([
   "http://localhost:3000",
   "http://localhost:5173",
-  ...(process.env["REPLIT_DOMAINS"]?.split(",").filter(Boolean).map((domain) => `https://${domain}`) ?? []),
+  ...(process.env["ALLOWED_ORIGINS"]?.split(",").map((o) => o.trim()).filter(Boolean) ?? []),
 ]);
-app.use(cors({ origin: (origin, callback) => {
-  if (!origin || allowedOrigins.has(origin) || /\.replit\.dev$/.test(origin) || /\.repl\.co$/.test(origin)) callback(null, true);
-  else callback(new Error("Origin not allowed by CORS"));
-} }));
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.has(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Origin not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
+
 app.post(
   "/api/stripe/webhook",
   express.raw({ type: "application/json" }),

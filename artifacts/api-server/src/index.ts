@@ -1,7 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
-import { runMigrations } from "stripe-replit-sync";
-import { getStripeSync } from "./stripe/stripe-client";
+import { connectMongoDB } from "./lib/mongodb";
 
 const rawPort = process.env["PORT"];
 
@@ -17,40 +16,22 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-async function initializeStripe(): Promise<void> {
-  const databaseUrl = process.env["DATABASE_URL"];
-  const domains = process.env["REPLIT_DOMAINS"];
-  if (!databaseUrl) {
-    throw new Error("DATABASE_URL is required for Stripe synchronization.");
-  }
-  if (!domains) {
-    throw new Error("REPLIT_DOMAINS is required for Stripe webhooks.");
-  }
+async function initialize(): Promise<void> {
+  // Connect to MongoDB
+  await connectMongoDB();
+  logger.info("MongoDB connected");
 
-  await runMigrations({ databaseUrl });
-  const stripeSync = await getStripeSync();
-  const webhookUrl = `https://${domains.split(",")[0]}/api/stripe/webhook`;
-  await stripeSync.findOrCreateManagedWebhook(webhookUrl, {
-    enabled_events: ["*"],
-  });
-  try {
-    await stripeSync.syncBackfill();
-  } catch (error) {
-    logger.warn(
-      { err: error },
-      "Stripe backfill did not complete; webhook processing remains active",
-    );
+  // Verify Stripe credentials are available (fail fast)
+  const stripeKey = process.env["STRIPE_SECRET_KEY"];
+  if (!stripeKey) {
+    logger.warn("STRIPE_SECRET_KEY is not set — Stripe features will fail");
+  } else {
+    logger.info("Stripe credentials available");
   }
-  logger.info("Stripe synchronization initialized");
 }
 
-await initializeStripe();
+await initialize();
 
-app.listen(port, (err) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
-    process.exit(1);
-  }
-
+app.listen(port, () => {
   logger.info({ port }, "Server listening");
 });

@@ -11,9 +11,10 @@ import { getUncachableStripeClient } from "../stripe/stripe-client";
 const router: IRouter = Router();
 
 function appOrigin(req: Request): string {
-  const domain = process.env["REPLIT_DOMAINS"]?.split(",")[0];
-  if (domain) {
-    return `https://${domain}`;
+  // APP_URL should be your frontend URL, e.g. "https://farrez.vercel.app"
+  const appUrl = process.env["APP_URL"];
+  if (appUrl) {
+    return appUrl.replace(/\/$/, ""); // strip trailing slash
   }
   return `${req.protocol}://${req.get("host")}`;
 }

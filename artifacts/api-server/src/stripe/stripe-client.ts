@@ -1,77 +1,51 @@
 import Stripe from "stripe";
-import { StripeSync } from "stripe-replit-sync";
 
-async function getStripeCredentials(): Promise<{
-  secretKey: string;
-  webhookSecret?: string;
-}> {
-  const hostname = process.env["REPLIT_CONNECTORS_HOSTNAME"];
-  const token = process.env["REPL_IDENTITY"]
-    ? `repl ${process.env["REPL_IDENTITY"]}`
-    : process.env["WEB_REPL_RENEWAL"]
-      ? `depl ${process.env["WEB_REPL_RENEWAL"]}`
-      : null;
-
-  if (!hostname || !token) {
-    throw new Error(
-      "Stripe connection environment is unavailable. Connect Stripe through Replit Integrations.",
-    );
-  }
-
-  const response = await fetch(
-    `https://${hostname}/api/v2/connection?include_secrets=true&connector_names=stripe`,
-    {
-      headers: {
-        Accept: "application/json",
-        X_REPLIT_TOKEN: token,
-      },
-      signal: AbortSignal.timeout(10_000),
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      `Unable to obtain Stripe credentials (${response.status}).`,
-    );
-  }
-
-  const data = (await response.json()) as {
-    items?: Array<{
-      settings?: {
-        secret?: string;
-        secret_key?: string;
-        webhook_secret?: string;
-      };
-    }>;
-  };
-  const settings = data.items?.[0]?.settings;
-  const secretKey = settings?.secret ?? settings?.secret_key;
-
+/**
+ * Returns the Stripe secret key from environment variables.
+ * On Render, set STRIPE_SECRET_KEY in the Environment Variables section.
+ */
+function getStripeSecretKey(): string {
+  const secretKey = process.env["STRIPE_SECRET_KEY"];
   if (!secretKey) {
-    throw new Error("The connected Stripe account has no usable secret key.");
+    throw new Error(
+      "STRIPE_SECRET_KEY environment variable is required. " +
+        "Set it in your Render dashboard under Environment Variables.",
+    );
   }
-
-  return {
-    secretKey,
-    webhookSecret: settings?.webhook_secret,
-  };
+  return secretKey;
 }
 
-export async function getUncachableStripeClient(): Promise<Stripe> {
-  const { secretKey } = await getStripeCredentials();
-  return new Stripe(secretKey);
+/**
+ * Returns the Stripe webhook signing secret from environment variables.
+ * On Render, set STRIPE_WEBHOOK_SECRET after creating a webhook endpoint
+ * in the Stripe Dashboard pointing to https://your-render-url.onrender.com/api/stripe/webhook
+ */
+export function getStripeWebhookSecret(): string {
+  const webhookSecret = process.env["STRIPE_WEBHOOK_SECRET"];
+  if (!webhookSecret) {
+    throw new Error(
+      "STRIPE_WEBHOOK_SECRET environment variable is required. " +
+        "Create a webhook in your Stripe Dashboard and set the signing secret.",
+    );
+  }
+  return webhookSecret;
 }
 
-export async function getStripeSync(): Promise<StripeSync> {
-  const databaseUrl = process.env["DATABASE_URL"];
-  if (!databaseUrl) {
-    throw new Error("DATABASE_URL is required for Stripe synchronization.");
-  }
+/**
+ * Creates a fresh Stripe client (not cached) for operations where
+ * you always want the latest credentials.
+ */
+export function getUncachableStripeClient(): Stripe {
+  return new Stripe(getStripeSecretKey());
+}
 
-  const { secretKey, webhookSecret } = await getStripeCredentials();
-  return new StripeSync({
-    poolConfig: { connectionString: databaseUrl },
-    stripeSecretKey: secretKey,
-    stripeWebhookSecret: webhookSecret ?? "",
-  });
+/**
+ * Creates a cached Stripe client for general use.
+ */
+let _cachedClient: Stripe | null = null;
+export function getStripeClient(): Stripe {
+  if (!_cachedClient) {
+    _cachedClient = new Stripe(getStripeSecretKey());
+  }
+  return _cachedClient;
 }

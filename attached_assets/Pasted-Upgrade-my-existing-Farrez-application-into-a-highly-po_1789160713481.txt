@@ -1,0 +1,83 @@
+Upgrade my existing Farrez application into a highly polished, interactive, production-style product while preserving the current Google Stitch design, MERN architecture, MongoDB database, working comparison flow, and Stripe sandbox setup.
+
+Do NOT redesign the app from scratch. Keep the existing Farrez identity, dark blue visual style, rounded cards, typography, spacing, layout, and professional Kuwait-focused feel.
+
+First, inspect the entire application and create a checklist of every visible button, link, navigation item, card, icon, input, dropdown, arrow, and interactive element. Identify what already works and what is currently static or incomplete.
+
+Then make the application fully functional and significantly more interactive.
+
+Functional features
+Complete Vendors page backed by MongoDB
+Add Vendor
+Edit Vendor
+Delete Vendor with confirmation
+Vendor details page/modal
+Vendor search
+Vendor filtering and sorting
+Saved comparison history
+Reopen previous comparisons
+Supplier history
+Previous quoted prices
+Previous total costs
+Previous delivery times
+Past comparison outcomes
+Price increase/decrease indicators
+Supplier performance insights based on stored Farrez data
+Working Analysis navigation
+Working Compare navigation
+Working Vendors navigation
+Working vendor carousel arrows
+Functional Farrez Pro button showing plan/subscription information
+Functional profile/settings menu
+Make the UI feel dynamic, NOT static
+
+Add polished interactions throughout the existing design:
+
+Hover states for buttons, cards, vendor tabs, navigation, icons, and clickable elements
+Smooth transitions and subtle animations
+Buttons should visually respond when clicked
+Cards can slightly lift or highlight on hover
+Active navigation states
+Selected vendor states
+Animated dropdowns and menus
+Smooth modal open/close transitions
+Tooltips where icons are not obvious
+Toast notifications for successful actions such as vendor saved, comparison saved, deleted, etc.
+Confirmation dialogs for destructive actions
+Skeleton loading states instead of blank screens
+Empty states when there is no data
+Friendly error states
+Form validation with clear inline feedback
+Disable buttons when required fields are incomplete
+Success feedback after comparison creation
+Light mode + dark mode
+
+Add a working Light/Dark Mode toggle inside the profile/settings area.
+
+Requirements:
+
+Current Farrez dark theme remains the default
+Create a professional light theme using the same Farrez brand identity
+Do not make light mode plain white or generic
+Maintain blue accents, rounded cards, hierarchy, readability, and premium feel
+Smooth transition between themes
+Remember the user's theme choice using local storage
+Respect system theme on first visit if practical
+Responsive UX
+Fully responsive on desktop, tablet, and mobile
+No horizontal overflow
+Cards reorganize naturally on smaller screens
+Navigation remains easy to use
+Modals and forms work properly on mobile
+Maintain good touch target sizes
+Quality rules
+No dead buttons
+No fake buttons
+No placeholder interactions unless clearly labeled Coming Soon
+No static controls that look clickable
+Do not remove existing functionality
+Do not break MongoDB, MERN, Stripe sandbox, or the comparison algorithm
+Do not replace the Google Stitch design with a generic AI-generated dashboard
+Keep KWD for vendor quotation data
+
+Before implementing, show me the audit/checklist of what currently works and what needs to be completed. Do not begin major changes until the audit is finished.

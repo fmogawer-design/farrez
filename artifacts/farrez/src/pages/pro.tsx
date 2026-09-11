@@ -6,7 +6,10 @@ import { useLocation } from "wouter";
 export default function Pro() {
   const [billingError, setBillingError] = useState(false);
   
-  const urlParams = new URLSearchParams(window.location.search);
+  const urlParams =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search)
+      : new URLSearchParams();
   const checkoutSessionId = urlParams.get("session_id");
   const checkoutStatus = urlParams.get("checkout");
   const isCanceled = checkoutStatus === "cancelled";

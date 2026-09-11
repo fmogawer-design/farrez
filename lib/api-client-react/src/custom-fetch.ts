@@ -286,6 +286,10 @@ function inferResponseType(response: Response): "json" | "text" | "blob" {
   const mediaType = getMediaType(response.headers);
 
   if (isJsonMediaType(mediaType)) return "json";
+  if (mediaType === "text/html") {
+    // API responses returning HTML indicate an SPA rewrite or error page, not valid API payload
+    return "json";
+  }
   if (isTextMediaType(mediaType) || mediaType == null) return "text";
   return "blob";
 }

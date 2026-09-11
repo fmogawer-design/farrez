@@ -395,11 +395,11 @@ export default function Compare() {
     );
   };
 
-  const filteredSavedVendors = savedVendors?.filter(v => 
+  const filteredSavedVendors = (Array.isArray(savedVendors) ? savedVendors : []).filter(v => 
     v.status === 'active' &&
     v.name.toLowerCase().includes(vendorSearch.toLowerCase()) && 
     (swapSlotId !== null || !vendors.some(activeV => activeV.vendorId === v.id))
-  ) || [];
+  );
 
   const isFormValid = vendors.length >= 2 && vendors.every(isCompleteQuote);
 

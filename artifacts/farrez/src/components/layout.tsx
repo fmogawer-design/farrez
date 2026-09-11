@@ -9,8 +9,11 @@ export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const { theme, setTheme } = useTheme();
 
-  // Optionally check pro status to reflect in UI
-  const checkoutSessionId = new URLSearchParams(window.location.search).get("session_id");
+  // Safely check pro status to reflect in UI
+  const checkoutSessionId =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("session_id")
+      : null;
   const checkoutSessionParams = { sessionId: checkoutSessionId ?? "" };
   const { data: checkoutData } = useGetBillingCheckoutSession(checkoutSessionParams, {
     query: {
@@ -21,7 +24,9 @@ export function Layout({ children }: { children: ReactNode }) {
   });
 
   const hasActivePro =
-    checkoutData?.status === "complete" &&
+    typeof checkoutData === "object" &&
+    checkoutData !== null &&
+    checkoutData.status === "complete" &&
     ["active", "trialing"].includes(checkoutData.subscriptionStatus ?? "");
 
   const getNavClass = (path: string, active: boolean) => {

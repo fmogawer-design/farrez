@@ -341,14 +341,14 @@ export default function Vendors() {
       <div className="flex flex-col gap-space-sm">
         {isLoading ? (
           <div className="flex justify-center p-8"><span className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></span></div>
-        ) : vendors?.length === 0 ? (
+        ) : !Array.isArray(vendors) || vendors.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 bg-surface-container-low rounded-2xl border border-dashed border-outline-variant/30 text-on-surface-variant">
             <Store size={32} className="mb-2 opacity-50" />
             <p className="font-medium text-on-surface">No vendors found</p>
             <p className="text-sm mt-1 text-center">Try a different search or register a new vendor.</p>
           </div>
         ) : (
-          vendors?.map((v) => (
+          vendors.map((v) => (
             <div key={v.id} className="flex flex-col bg-surface-container-low rounded-2xl border border-outline-variant/10 overflow-hidden shadow-sm hover:border-outline-variant/30 transition-colors">
               <div 
                 role="button"

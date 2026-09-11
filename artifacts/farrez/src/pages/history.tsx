@@ -57,7 +57,7 @@ export default function History() {
           <div className="flex justify-center p-8">
             <span className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
           </div>
-        ) : comparisons?.length === 0 ? (
+        ) : !Array.isArray(comparisons) || comparisons.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 bg-surface-container-low rounded-2xl border border-dashed border-outline-variant/30 text-on-surface-variant">
             <HistoryIcon size={32} className="mb-2 opacity-50" />
             <p className="font-medium text-on-surface">No history found</p>
@@ -67,7 +67,7 @@ export default function History() {
             </Link>
           </div>
         ) : (
-          comparisons?.map((c) => {
+          comparisons.map((c) => {
             const recommended = c.vendors.find(v => v.isRecommended) || c.vendors[0];
             const otherCount = c.vendors.length - 1;
             

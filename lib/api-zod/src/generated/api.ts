@@ -18,6 +18,53 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
+ * @summary List saved comparisons
+ */
+export const listComparisonsQuerySearchMax = 100;
+
+export const listComparisonsQueryOrderDefault = `desc`;
+
+export const ListComparisonsQueryParams = zod.object({
+  "search": zod.coerce.string().max(listComparisonsQuerySearchMax).optional(),
+  "sort": zod.enum(['createdAt', 'vendorName']).optional(),
+  "order": zod.enum(['asc', 'desc']).default(listComparisonsQueryOrderDefault)
+})
+
+
+export const listComparisonsResponseVendorsItemOneQuotedPriceMin = 0;
+
+export const listComparisonsResponseVendorsItemOneAdditionalFeesMin = 0;
+
+export const listComparisonsResponseVendorsItemOneDeliveryTimeExclusiveMin = 0;
+
+
+export const listComparisonsResponseVendorsMin = 2;
+export const listComparisonsResponseVendorsMax = 3;
+
+
+
+export const ListComparisonsResponseItem = zod.object({
+  "id": zod.string(),
+  "vendors": zod.array(zod.object({
+  "id": zod.number(),
+  "vendorName": zod.string().min(1),
+  "quotedPrice": zod.number().min(listComparisonsResponseVendorsItemOneQuotedPriceMin),
+  "additionalFees": zod.number().min(listComparisonsResponseVendorsItemOneAdditionalFeesMin),
+  "deliveryTime": zod.number().gt(listComparisonsResponseVendorsItemOneDeliveryTimeExclusiveMin),
+  "paymentTerms": zod.string().min(1),
+  "vendorId": zod.string().optional()
+}).and(zod.object({
+  "totalCost": zod.number(),
+  "isRecommended": zod.boolean(),
+  "isLowestCost": zod.boolean(),
+  "isFastestDelivery": zod.boolean()
+}))).min(listComparisonsResponseVendorsMin).max(listComparisonsResponseVendorsMax),
+  "createdAt": zod.coerce.date()
+})
+export const ListComparisonsResponse = zod.array(ListComparisonsResponseItem)
+
+
+/**
  * Calculates totals, recommends the lowest-cost vendor with delivery speed as the tie-breaker, and stores the comparison in MongoDB.
  * @summary Compare and save vendor quotations
  */
@@ -41,7 +88,8 @@ export const CreateComparisonBody = zod.object({
   "quotedPrice": zod.number().min(createComparisonBodyVendorsItemQuotedPriceMin),
   "additionalFees": zod.number().min(createComparisonBodyVendorsItemAdditionalFeesMin),
   "deliveryTime": zod.number().gt(createComparisonBodyVendorsItemDeliveryTimeExclusiveMin),
-  "paymentTerms": zod.string().min(1)
+  "paymentTerms": zod.string().min(1),
+  "vendorId": zod.string().optional()
 })).min(createComparisonBodyVendorsMin).max(createComparisonBodyVendorsMax)
 })
 
@@ -66,7 +114,8 @@ export const CreateComparisonResponse = zod.object({
   "quotedPrice": zod.number().min(createComparisonResponseVendorsItemOneQuotedPriceMin),
   "additionalFees": zod.number().min(createComparisonResponseVendorsItemOneAdditionalFeesMin),
   "deliveryTime": zod.number().gt(createComparisonResponseVendorsItemOneDeliveryTimeExclusiveMin),
-  "paymentTerms": zod.string().min(1)
+  "paymentTerms": zod.string().min(1),
+  "vendorId": zod.string().optional()
 }).and(zod.object({
   "totalCost": zod.number(),
   "isRecommended": zod.boolean(),
@@ -105,7 +154,8 @@ export const GetComparisonResponse = zod.object({
   "quotedPrice": zod.number().min(getComparisonResponseVendorsItemOneQuotedPriceMin),
   "additionalFees": zod.number().min(getComparisonResponseVendorsItemOneAdditionalFeesMin),
   "deliveryTime": zod.number().gt(getComparisonResponseVendorsItemOneDeliveryTimeExclusiveMin),
-  "paymentTerms": zod.string().min(1)
+  "paymentTerms": zod.string().min(1),
+  "vendorId": zod.string().optional()
 }).and(zod.object({
   "totalCost": zod.number(),
   "isRecommended": zod.boolean(),
@@ -113,6 +163,167 @@ export const GetComparisonResponse = zod.object({
   "isFastestDelivery": zod.boolean()
 }))).min(getComparisonResponseVendorsMin).max(getComparisonResponseVendorsMax),
   "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List vendors
+ */
+export const listVendorsQuerySearchMax = 100;
+
+export const listVendorsQueryOrderDefault = `asc`;
+
+export const ListVendorsQueryParams = zod.object({
+  "search": zod.coerce.string().max(listVendorsQuerySearchMax).optional(),
+  "status": zod.enum(['active', 'inactive']).optional(),
+  "sort": zod.enum(['name', 'createdAt', 'updatedAt']).optional(),
+  "order": zod.enum(['asc', 'desc']).default(listVendorsQueryOrderDefault)
+})
+
+
+
+
+
+
+export const ListVendorsResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string().min(1),
+  "commercialLicense": zod.string().min(1),
+  "category": zod.string().min(1),
+  "status": zod.enum(['active', 'inactive']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const ListVendorsResponse = zod.array(ListVendorsResponseItem)
+
+
+/**
+ * @summary Create a vendor
+ */
+
+
+
+
+
+export const CreateVendorBody = zod.object({
+  "name": zod.string().min(1),
+  "commercialLicense": zod.string().min(1),
+  "category": zod.string().min(1),
+  "status": zod.enum(['active', 'inactive']).optional(),
+  "notes": zod.string().optional()
+})
+
+
+
+
+
+
+export const CreateVendorResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string().min(1),
+  "commercialLicense": zod.string().min(1),
+  "category": zod.string().min(1),
+  "status": zod.enum(['active', 'inactive']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+export const GetVendorParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+
+
+export const GetVendorResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string().min(1),
+  "commercialLicense": zod.string().min(1),
+  "category": zod.string().min(1),
+  "status": zod.enum(['active', 'inactive']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}).and(zod.object({
+  "insights": zod.object({
+  "comparisonCount": zod.number().int(),
+  "recommendationCount": zod.number().int(),
+  "recommendationRate": zod.number(),
+  "averageQuotedPrice": zod.number(),
+  "averageTotalCost": zod.number(),
+  "averageDeliveryDays": zod.number(),
+  "latestQuote": zod.object({
+  "comparisonId": zod.string(),
+  "date": zod.coerce.date(),
+  "quotedPrice": zod.number(),
+  "totalCost": zod.number(),
+  "deliveryDays": zod.number(),
+  "outcome": zod.enum(['recommended', 'notRecommended'])
+}).nullable(),
+  "previousQuotes": zod.array(zod.object({
+  "comparisonId": zod.string(),
+  "date": zod.coerce.date(),
+  "quotedPrice": zod.number(),
+  "totalCost": zod.number(),
+  "deliveryDays": zod.number(),
+  "outcome": zod.enum(['recommended', 'notRecommended'])
+})),
+  "pricePercentageChange": zod.number().nullish(),
+  "totalCostPercentageChange": zod.number().nullish()
+})
+}))
+
+
+export const UpdateVendorParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+
+
+export const UpdateVendorBody = zod.object({
+  "name": zod.string().min(1).optional(),
+  "commercialLicense": zod.string().min(1).optional(),
+  "category": zod.string().min(1).optional(),
+  "status": zod.enum(['active', 'inactive']).optional(),
+  "notes": zod.string().optional()
+})
+
+
+
+
+
+
+export const UpdateVendorResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string().min(1),
+  "commercialLicense": zod.string().min(1),
+  "category": zod.string().min(1),
+  "status": zod.enum(['active', 'inactive']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * Marks the vendor inactive without deleting historical comparison data.
+ * @summary Archive a vendor
+ */
+export const DeleteVendorParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const DeleteVendorResponse = zod.object({
+  "id": zod.string(),
+  "deleted": zod.boolean()
 })
 
 

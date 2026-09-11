@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: comparisons
     description: Vendor quotation comparison operations
+  - name: vendors
+    description: Vendor management and quotation insights
   - name: billing
     description: Farrez Pro subscription operations
 paths:
@@ -29,6 +31,20 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
   /comparisons:
+    get:
+      operationId: listComparisons
+      tags: [comparisons]
+      summary: List saved comparisons
+      parameters:
+        - {name: search, in: query, schema: {type: string, maxLength: 100}}
+        - {name: sort, in: query, schema: {type: string, enum: [createdAt, vendorName]}}
+        - {name: order, in: query, schema: {type: string, enum: [asc, desc], default: desc}}
+      responses:
+        "200":
+          description: Saved comparisons
+          content:
+            application/json:
+              schema: {type: array, items: {$ref: "#/components/schemas/Comparison"}}
     post:
       operationId: createComparison
       tags: [comparisons]
@@ -71,6 +87,82 @@ paths:
           description: Invalid comparison identifier
         "404":
           description: Comparison not found
+  /vendors:
+    get:
+      operationId: listVendors
+      tags: [vendors]
+      summary: List vendors
+      parameters:
+        - {name: search, in: query, schema: {type: string, maxLength: 100}}
+        - {name: status, in: query, schema: {type: string, enum: [active, inactive]}}
+        - {name: sort, in: query, schema: {type: string, enum: [name, createdAt, updatedAt]}}
+        - {name: order, in: query, schema: {type: string, enum: [asc, desc], default: asc}}
+      responses:
+        "200":
+          description: Vendors
+          content:
+            application/json:
+              schema: {type: array, items: {$ref: "#/components/schemas/Vendor"}}
+    post:
+      operationId: createVendor
+      tags: [vendors]
+      summary: Create a vendor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/VendorInput"}
+      responses:
+        "201":
+          description: Created vendor
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Vendor"}}
+        "400": {description: Invalid vendor}
+        "409": {description: Vendor already exists}
+  /vendors/{id}:
+    get:
+      operationId: getVendor
+      tags: [vendors]
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string}}
+      responses:
+        "200":
+          description: Vendor detail and insights
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/VendorDetail"}}
+        "400": {description: Invalid vendor identifier}
+        "404": {description: Vendor not found}
+    patch:
+      operationId: updateVendor
+      tags: [vendors]
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/VendorUpdate"}
+      responses:
+        "200":
+          description: Updated vendor
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Vendor"}}
+        "400": {description: Invalid input}
+        "404": {description: Vendor not found}
+        "409": {description: Vendor already exists}
+    delete:
+      operationId: deleteVendor
+      tags: [vendors]
+      summary: Archive a vendor
+      description: Marks the vendor inactive without deleting historical comparison data.
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string}}
+      responses:
+        "200":
+          description: Deletion result
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/DeleteResult"}}
+        "404": {description: Vendor not found}
   /billing/plan:
     get:
       operationId: getBillingPlan
@@ -149,6 +241,8 @@ components:
         paymentTerms:
           type: string
           minLength: 1
+        vendorId:
+          type: string
       required:
         - id
         - vendorName
@@ -156,6 +250,7 @@ components:
         - additionalFees
         - deliveryTime
         - paymentTerms
+      additionalProperties: false
     ComparisonInput:
       type: object
       properties:
@@ -167,6 +262,72 @@ components:
             $ref: "#/components/schemas/VendorQuoteInput"
       required:
         - vendors
+    Vendor:
+      type: object
+      required: [id, name, commercialLicense, category, status, createdAt, updatedAt]
+      properties:
+        id: {type: string}
+        name: {type: string, minLength: 1}
+        commercialLicense: {type: string, minLength: 1}
+        category: {type: string, minLength: 1}
+        status: {type: string, enum: [active, inactive]}
+        notes: {type: ["string", "null"]}
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
+    VendorInput:
+      type: object
+      required: [name, commercialLicense, category]
+      properties:
+        name: {type: string, minLength: 1}
+        commercialLicense: {type: string, minLength: 1}
+        category: {type: string, minLength: 1}
+        status: {type: string, enum: [active, inactive]}
+        notes: {type: string}
+    VendorUpdate:
+      type: object
+      properties:
+        name: {type: string, minLength: 1}
+        commercialLicense: {type: string, minLength: 1}
+        category: {type: string, minLength: 1}
+        status: {type: string, enum: [active, inactive]}
+        notes: {type: string}
+    VendorQuoteSnapshot:
+      type: object
+      required: [comparisonId, date, quotedPrice, totalCost, deliveryDays, outcome]
+      properties:
+        comparisonId: {type: string}
+        date: {type: string, format: date-time}
+        quotedPrice: {type: number}
+        totalCost: {type: number}
+        deliveryDays: {type: number}
+        outcome: {type: string, enum: [recommended, notRecommended]}
+    VendorInsight:
+      type: object
+      required: [comparisonCount, recommendationCount, recommendationRate, averageQuotedPrice, averageTotalCost, averageDeliveryDays, latestQuote, previousQuotes]
+      properties:
+        comparisonCount: {type: integer}
+        recommendationCount: {type: integer}
+        recommendationRate: {type: number}
+        averageQuotedPrice: {type: number}
+        averageTotalCost: {type: number}
+        averageDeliveryDays: {type: number}
+        latestQuote: {type: ["object", "null"], allOf: [{$ref: "#/components/schemas/VendorQuoteSnapshot"}]}
+        previousQuotes: {type: array, items: {$ref: "#/components/schemas/VendorQuoteSnapshot"}}
+        pricePercentageChange: {type: ["number", "null"]}
+        totalCostPercentageChange: {type: ["number", "null"]}
+    VendorDetail:
+      allOf:
+        - {$ref: "#/components/schemas/Vendor"}
+        - type: object
+          required: [insights]
+          properties:
+            insights: {$ref: "#/components/schemas/VendorInsight"}
+    DeleteResult:
+      type: object
+      required: [id, deleted]
+      properties:
+        id: {type: string}
+        deleted: {type: boolean}
     VendorQuoteResult:
       allOf:
         - $ref: "#/components/schemas/VendorQuoteInput"

@@ -18,4 +18,5 @@ export interface VendorQuoteInput {
   deliveryTime: number;
   /** @minLength 1 */
   paymentTerms: string;
+  vendorId?: string;
 }

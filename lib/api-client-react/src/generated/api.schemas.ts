@@ -21,6 +21,7 @@ export interface VendorQuoteInput {
   deliveryTime: number;
   /** @minLength 1 */
   paymentTerms: string;
+  vendorId?: string;
 }
 
 export interface ComparisonInput {
@@ -29,6 +30,109 @@ export interface ComparisonInput {
      * @maxItems 3
      */
   vendors: VendorQuoteInput[];
+}
+
+export type VendorStatus = typeof VendorStatus[keyof typeof VendorStatus];
+
+
+export const VendorStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export interface Vendor {
+  id: string;
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  commercialLicense: string;
+  /** @minLength 1 */
+  category: string;
+  status: VendorStatus;
+  /** @nullable */
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type VendorInputStatus = typeof VendorInputStatus[keyof typeof VendorInputStatus];
+
+
+export const VendorInputStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export interface VendorInput {
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  commercialLicense: string;
+  /** @minLength 1 */
+  category: string;
+  status?: VendorInputStatus;
+  notes?: string;
+}
+
+export type VendorUpdateStatus = typeof VendorUpdateStatus[keyof typeof VendorUpdateStatus];
+
+
+export const VendorUpdateStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export interface VendorUpdate {
+  /** @minLength 1 */
+  name?: string;
+  /** @minLength 1 */
+  commercialLicense?: string;
+  /** @minLength 1 */
+  category?: string;
+  status?: VendorUpdateStatus;
+  notes?: string;
+}
+
+export type VendorQuoteSnapshotOutcome = typeof VendorQuoteSnapshotOutcome[keyof typeof VendorQuoteSnapshotOutcome];
+
+
+export const VendorQuoteSnapshotOutcome = {
+  recommended: 'recommended',
+  notRecommended: 'notRecommended',
+} as const;
+
+export interface VendorQuoteSnapshot {
+  comparisonId: string;
+  date: string;
+  quotedPrice: number;
+  totalCost: number;
+  deliveryDays: number;
+  outcome: VendorQuoteSnapshotOutcome;
+}
+
+export interface VendorInsight {
+  comparisonCount: number;
+  recommendationCount: number;
+  recommendationRate: number;
+  averageQuotedPrice: number;
+  averageTotalCost: number;
+  averageDeliveryDays: number;
+  /** @nullable */
+  latestQuote: VendorQuoteSnapshot | null;
+  previousQuotes: VendorQuoteSnapshot[];
+  /** @nullable */
+  pricePercentageChange?: number | null;
+  /** @nullable */
+  totalCostPercentageChange?: number | null;
+}
+
+export type VendorDetail = Vendor & {
+  insights: VendorInsight;
+};
+
+export interface DeleteResult {
+  id: string;
+  deleted: boolean;
 }
 
 export type VendorQuoteResult = VendorQuoteInput & {
@@ -93,6 +197,66 @@ export interface CheckoutSessionStatus {
   paymentStatus: CheckoutSessionStatusPaymentStatus;
   subscriptionStatus: string | null;
 }
+
+export type ListComparisonsParams = {
+/**
+ * @maxLength 100
+ */
+search?: string;
+sort?: ListComparisonsSort;
+order?: ListComparisonsOrder;
+};
+
+export type ListComparisonsSort = typeof ListComparisonsSort[keyof typeof ListComparisonsSort];
+
+
+export const ListComparisonsSort = {
+  createdAt: 'createdAt',
+  vendorName: 'vendorName',
+} as const;
+
+export type ListComparisonsOrder = typeof ListComparisonsOrder[keyof typeof ListComparisonsOrder];
+
+
+export const ListComparisonsOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
+
+export type ListVendorsParams = {
+/**
+ * @maxLength 100
+ */
+search?: string;
+status?: ListVendorsStatus;
+sort?: ListVendorsSort;
+order?: ListVendorsOrder;
+};
+
+export type ListVendorsStatus = typeof ListVendorsStatus[keyof typeof ListVendorsStatus];
+
+
+export const ListVendorsStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export type ListVendorsSort = typeof ListVendorsSort[keyof typeof ListVendorsSort];
+
+
+export const ListVendorsSort = {
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+} as const;
+
+export type ListVendorsOrder = typeof ListVendorsOrder[keyof typeof ListVendorsOrder];
+
+
+export const ListVendorsOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
 
 export type GetBillingCheckoutSessionParams = {
 /**

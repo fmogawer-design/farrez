@@ -2,6 +2,7 @@ import mongoose, { Schema, type Model } from "mongoose";
 
 export type VendorResultRecord = {
   clientId: number;
+  vendorId?: string;
   vendorName: string;
   quotedPrice: number;
   additionalFees: number;
@@ -22,6 +23,7 @@ export type ComparisonRecord = {
 const vendorResultSchema = new Schema(
   {
     clientId: { type: Number, required: true },
+    vendorId: { type: String, required: false, index: true },
     vendorName: { type: String, required: true, trim: true },
     quotedPrice: { type: Number, required: true, min: 0 },
     additionalFees: { type: Number, required: true, min: 0 },
@@ -49,6 +51,8 @@ const comparisonSchema = new Schema(
   },
   { timestamps: true },
 );
+
+comparisonSchema.index({ "vendors.vendorId": 1, createdAt: -1 });
 
 export const ComparisonModel: Model<ComparisonRecord> =
   (mongoose.models["Comparison"] as Model<ComparisonRecord> | undefined) ??

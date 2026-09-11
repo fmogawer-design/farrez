@@ -5,6 +5,7 @@ type VendorInput = {
   additionalFees: number;
   deliveryTime: number;
   paymentTerms: string;
+  vendorId?: string;
 };
 
 export type VendorResult = VendorInput & {

@@ -33,7 +33,14 @@ async function initializeStripe(): Promise<void> {
   await stripeSync.findOrCreateManagedWebhook(webhookUrl, {
     enabled_events: ["*"],
   });
-  await stripeSync.syncBackfill();
+  try {
+    await stripeSync.syncBackfill();
+  } catch (error) {
+    logger.warn(
+      { err: error },
+      "Stripe backfill did not complete; webhook processing remains active",
+    );
+  }
   logger.info("Stripe synchronization initialized");
 }
 

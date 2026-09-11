@@ -40,8 +40,8 @@ router.post("/billing/checkout", async (req, res): Promise<void> => {
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     line_items: [{ price: plan.priceId, quantity: 1 }],
-    success_url: `${origin}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/?checkout=cancelled`,
+    success_url: `${origin}/pro?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/pro?checkout=cancelled`,
     allow_promotion_codes: true,
     billing_address_collection: "auto",
     metadata: { farrez_plan: "pro" },

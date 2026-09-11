@@ -26,7 +26,15 @@ app.use(
     },
   }),
 );
-app.use(cors());
+const allowedOrigins = new Set([
+  "http://localhost:3000",
+  "http://localhost:5173",
+  ...(process.env["REPLIT_DOMAINS"]?.split(",").filter(Boolean).map((domain) => `https://${domain}`) ?? []),
+]);
+app.use(cors({ origin: (origin, callback) => {
+  if (!origin || allowedOrigins.has(origin) || /\.replit\.dev$/.test(origin) || /\.repl\.co$/.test(origin)) callback(null, true);
+  else callback(new Error("Origin not allowed by CORS"));
+} }));
 app.post(
   "/api/stripe/webhook",
   express.raw({ type: "application/json" }),

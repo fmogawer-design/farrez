@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: comparisons
+    description: Vendor quotation comparison operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,49 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /comparisons:
+    post:
+      operationId: createComparison
+      tags: [comparisons]
+      summary: Compare and save vendor quotations
+      description: Calculates totals, recommends the lowest-cost vendor with delivery speed as the tie-breaker, and stores the comparison in MongoDB.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComparisonInput"
+      responses:
+        "201":
+          description: Comparison calculated and saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comparison"
+        "400":
+          description: Invalid comparison input
+  /comparisons/{id}:
+    get:
+      operationId: getComparison
+      tags: [comparisons]
+      summary: Get a saved comparison
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Saved comparison
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comparison"
+        "400":
+          description: Invalid comparison identifier
+        "404":
+          description: Comparison not found
 components:
   schemas:
     HealthStatus:
@@ -33,4 +78,78 @@ components:
           type: string
       required:
         - status
+    VendorQuoteInput:
+      type: object
+      properties:
+        id:
+          type: number
+        vendorName:
+          type: string
+          minLength: 1
+        quotedPrice:
+          type: number
+          minimum: 0
+        additionalFees:
+          type: number
+          minimum: 0
+        deliveryTime:
+          type: number
+          exclusiveMinimum: 0
+        paymentTerms:
+          type: string
+          minLength: 1
+      required:
+        - id
+        - vendorName
+        - quotedPrice
+        - additionalFees
+        - deliveryTime
+        - paymentTerms
+    ComparisonInput:
+      type: object
+      properties:
+        vendors:
+          type: array
+          minItems: 2
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/VendorQuoteInput"
+      required:
+        - vendors
+    VendorQuoteResult:
+      allOf:
+        - $ref: "#/components/schemas/VendorQuoteInput"
+        - type: object
+          properties:
+            totalCost:
+              type: number
+            isRecommended:
+              type: boolean
+            isLowestCost:
+              type: boolean
+            isFastestDelivery:
+              type: boolean
+          required:
+            - totalCost
+            - isRecommended
+            - isLowestCost
+            - isFastestDelivery
+    Comparison:
+      type: object
+      properties:
+        id:
+          type: string
+        vendors:
+          type: array
+          minItems: 2
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/VendorQuoteResult"
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - vendors
+        - createdAt
 

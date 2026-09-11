@@ -33,13 +33,13 @@ import {
   Zap
 } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useCreateComparison } from '@workspace/api-client-react';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 import {
-  compareVendorQuotes,
   isCompleteQuote,
   type QuoteResult,
   type VendorQuote,
@@ -339,6 +339,7 @@ function Home() {
   const [activeTab, setActiveTab] = useState<'compare' | 'analysis' | 'vendors'>('compare');
   const [activeVendorIndex, setActiveVendorIndex] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
+  const comparisonMutation = useCreateComparison();
 
   const updateVendor = (id: number, field: keyof VendorQuote, value: string) => {
     setVendors((current) =>
@@ -403,15 +404,44 @@ function Home() {
       return;
     }
 
-    const finalResults = compareVendorQuotes(vendors);
-
     setError('');
-    setResults(finalResults);
-    setActiveTab('analysis');
-    
-    const recommendedIndex = finalResults.findIndex(r => r.isRecommended);
-    setActiveVendorIndex(recommendedIndex >= 0 ? recommendedIndex : 0);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    comparisonMutation.mutate(
+      {
+        data: {
+          vendors: vendors.map((vendor) => ({
+            id: vendor.id,
+            vendorName: vendor.vendorName.trim(),
+            quotedPrice: numberFrom(vendor.quotedPrice),
+            additionalFees: numberFrom(vendor.additionalFees),
+            deliveryTime: numberFrom(vendor.deliveryTime),
+            paymentTerms: vendor.paymentTerms.trim(),
+          })),
+        },
+      },
+      {
+        onSuccess: (comparison) => {
+          const finalResults: QuoteResult[] = comparison.vendors.map((vendor) => ({
+            ...vendor,
+            quotedPrice: String(vendor.quotedPrice),
+            additionalFees: String(vendor.additionalFees),
+            deliveryTime: String(vendor.deliveryTime),
+          }));
+
+          setResults(finalResults);
+          setActiveTab('analysis');
+          const recommendedIndex = finalResults.findIndex(
+            (result) => result.isRecommended,
+          );
+          setActiveVendorIndex(recommendedIndex >= 0 ? recommendedIndex : 0);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        onError: () => {
+          setError(
+            'Farrez could not save this comparison. Please try again.',
+          );
+        },
+      },
+    );
   };
 
   const renderCompare = () => (
@@ -506,9 +536,9 @@ function Home() {
         )}
 
         <div className="pt-space-xs flex flex-col gap-space-xs">
-          <button type="submit" data-testid="button-compare-quotes" className="w-full h-14 rounded-2xl bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center gap-space-sm shadow-[0_0_24px_-4px_rgba(77,142,255,0.45)] hover:shadow-[0_0_32px_0px_rgba(77,142,255,0.6)] active:scale-[0.99] transition-all">
+          <button type="submit" disabled={comparisonMutation.isPending} data-testid="button-compare-quotes" className="w-full h-14 rounded-2xl bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center gap-space-sm shadow-[0_0_24px_-4px_rgba(77,142,255,0.45)] hover:shadow-[0_0_32px_0px_rgba(77,142,255,0.6)] active:scale-[0.99] transition-all disabled:cursor-wait disabled:opacity-70">
             <LineChart size={22} />
-            <span>Compare {vendors.length} Vendors</span>
+            <span>{comparisonMutation.isPending ? 'Comparing Vendors' : `Compare ${vendors.length} Vendors`}</span>
             <ArrowRight size={20} />
           </button>
           <div className="flex items-center justify-center gap-1 text-center">

@@ -20,8 +20,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  BillingPlan,
+  CheckoutSession,
+  CheckoutSessionStatus,
   Comparison,
   ComparisonInput,
+  GetBillingCheckoutSessionParams,
   HealthStatus
 } from './api.schemas';
 
@@ -284,6 +288,241 @@ export function useGetComparison<TData = Awaited<ReturnType<typeof getComparison
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetComparisonQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetBillingPlanUrl = () => {
+
+
+
+
+  return `/api/billing/plan`
+}
+
+/**
+ * @summary Get the active Farrez Pro subscription plan
+ */
+export const getBillingPlan = async ( options?: Parameters<typeof customFetch>[1]): Promise<BillingPlan> => {
+
+  return customFetch<BillingPlan>(getGetBillingPlanUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetBillingPlanQueryKey = () => {
+    return [
+    `/api/billing/plan`
+    ] as const;
+    }
+
+
+export const getGetBillingPlanQueryOptions = <TData = Awaited<ReturnType<typeof getBillingPlan>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBillingPlan>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBillingPlanQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBillingPlan>>> = ({ signal }) => getBillingPlan({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBillingPlan>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetBillingPlanQueryResult = NonNullable<Awaited<ReturnType<typeof getBillingPlan>>>
+export type GetBillingPlanQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get the active Farrez Pro subscription plan
+ */
+
+export function useGetBillingPlan<TData = Awaited<ReturnType<typeof getBillingPlan>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBillingPlan>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetBillingPlanQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateBillingCheckoutUrl = () => {
+
+
+
+
+  return `/api/billing/checkout`
+}
+
+/**
+ * @summary Create a Stripe Checkout Session for Farrez Pro
+ */
+export const createBillingCheckout = async ( options?: Parameters<typeof customFetch>[1]): Promise<CheckoutSession> => {
+
+  return customFetch<CheckoutSession>(getCreateBillingCheckoutUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCreateBillingCheckoutMutationKey = () => ['createBillingCheckout'] as const;
+
+export const getCreateBillingCheckoutMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBillingCheckout>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createBillingCheckout>>, TError,void, TContext> => {
+
+const mutationKey = getCreateBillingCheckoutMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createBillingCheckout>>, void> = () => {
+
+
+          return  createBillingCheckout(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateBillingCheckoutMutationResult = NonNullable<Awaited<ReturnType<typeof createBillingCheckout>>>
+
+    export type CreateBillingCheckoutMutationError = ErrorType<void>
+
+
+    /**
+ * @summary Create a Stripe Checkout Session for Farrez Pro
+ */
+export const useCreateBillingCheckout = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBillingCheckout>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createBillingCheckout>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getCreateBillingCheckoutMutationOptions(options));
+    }
+
+export const getGetBillingCheckoutSessionUrl = (params: GetBillingCheckoutSessionParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/billing/checkout-session?${stringifiedParams}` : `/api/billing/checkout-session`
+}
+
+/**
+ * @summary Verify a Stripe Checkout Session after redirect
+ */
+export const getBillingCheckoutSession = async (params: GetBillingCheckoutSessionParams, options?: Parameters<typeof customFetch>[1]): Promise<CheckoutSessionStatus> => {
+
+  return customFetch<CheckoutSessionStatus>(getGetBillingCheckoutSessionUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetBillingCheckoutSessionQueryKey = (params?: GetBillingCheckoutSessionParams,) => {
+    return [
+    `/api/billing/checkout-session`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetBillingCheckoutSessionQueryOptions = <TData = Awaited<ReturnType<typeof getBillingCheckoutSession>>, TError = ErrorType<void>>(params: GetBillingCheckoutSessionParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBillingCheckoutSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBillingCheckoutSessionQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBillingCheckoutSession>>> = ({ signal }) => getBillingCheckoutSession(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBillingCheckoutSession>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetBillingCheckoutSessionQueryResult = NonNullable<Awaited<ReturnType<typeof getBillingCheckoutSession>>>
+export type GetBillingCheckoutSessionQueryError = ErrorType<void>
+
+
+/**
+ * @summary Verify a Stripe Checkout Session after redirect
+ */
+
+export function useGetBillingCheckoutSession<TData = Awaited<ReturnType<typeof getBillingCheckoutSession>>, TError = ErrorType<void>>(
+ params: GetBillingCheckoutSessionParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBillingCheckoutSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetBillingCheckoutSessionQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

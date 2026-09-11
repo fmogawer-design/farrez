@@ -116,3 +116,42 @@ export const GetComparisonResponse = zod.object({
 })
 
 
+/**
+ * @summary Get the active Farrez Pro subscription plan
+ */
+export const GetBillingPlanResponse = zod.object({
+  "productId": zod.string(),
+  "priceId": zod.string(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "unitAmount": zod.number().int().describe('Amount in Stripe\'s minor currency unit.'),
+  "currency": zod.string(),
+  "interval": zod.enum(['month'])
+})
+
+
+/**
+ * @summary Create a Stripe Checkout Session for Farrez Pro
+ */
+export const CreateBillingCheckoutResponse = zod.object({
+  "url": zod.string().url()
+})
+
+
+/**
+ * @summary Verify a Stripe Checkout Session after redirect
+ */
+
+
+
+export const GetBillingCheckoutSessionQueryParams = zod.object({
+  "sessionId": zod.coerce.string().min(1)
+})
+
+export const GetBillingCheckoutSessionResponse = zod.object({
+  "status": zod.enum(['open', 'complete', 'expired']),
+  "paymentStatus": zod.enum(['paid', 'unpaid', 'no_payment_required']),
+  "subscriptionStatus": zod.string().nullable()
+})
+
+

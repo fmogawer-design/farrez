@@ -6,8 +6,15 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './billingPlan';
+export * from './billingPlanInterval';
+export * from './checkoutSession';
+export * from './checkoutSessionStatus';
+export * from './checkoutSessionStatusPaymentStatus';
+export * from './checkoutSessionStatusStatus';
 export * from './comparison';
 export * from './comparisonInput';
+export * from './getBillingCheckoutSessionParams';
 export * from './healthStatus';
 export * from './vendorQuoteInput';
 export * from './vendorQuoteResult';

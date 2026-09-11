@@ -48,3 +48,56 @@ export interface Comparison {
   createdAt: string;
 }
 
+export type BillingPlanInterval = typeof BillingPlanInterval[keyof typeof BillingPlanInterval];
+
+
+export const BillingPlanInterval = {
+  month: 'month',
+} as const;
+
+export interface BillingPlan {
+  productId: string;
+  priceId: string;
+  name: string;
+  description: string;
+  /** Amount in Stripe's minor currency unit. */
+  unitAmount: number;
+  currency: string;
+  interval: BillingPlanInterval;
+}
+
+export interface CheckoutSession {
+  url: string;
+}
+
+export type CheckoutSessionStatusStatus = typeof CheckoutSessionStatusStatus[keyof typeof CheckoutSessionStatusStatus];
+
+
+export const CheckoutSessionStatusStatus = {
+  open: 'open',
+  complete: 'complete',
+  expired: 'expired',
+} as const;
+
+export type CheckoutSessionStatusPaymentStatus = typeof CheckoutSessionStatusPaymentStatus[keyof typeof CheckoutSessionStatusPaymentStatus];
+
+
+export const CheckoutSessionStatusPaymentStatus = {
+  paid: 'paid',
+  unpaid: 'unpaid',
+  no_payment_required: 'no_payment_required',
+} as const;
+
+export interface CheckoutSessionStatus {
+  status: CheckoutSessionStatusStatus;
+  paymentStatus: CheckoutSessionStatusPaymentStatus;
+  subscriptionStatus: string | null;
+}
+
+export type GetBillingCheckoutSessionParams = {
+/**
+ * @minLength 1
+ */
+sessionId: string;
+};
+

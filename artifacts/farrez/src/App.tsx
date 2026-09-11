@@ -12,6 +12,7 @@ import {
   CheckCheck,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
   Download,
   FileText,
   Info,
@@ -33,7 +34,12 @@ import {
   Zap
 } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useCreateComparison } from '@workspace/api-client-react';
+import {
+  getGetBillingCheckoutSessionQueryKey,
+  useCreateBillingCheckout,
+  useCreateComparison,
+  useGetBillingCheckoutSession,
+} from '@workspace/api-client-react';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -340,6 +346,33 @@ function Home() {
   const [activeVendorIndex, setActiveVendorIndex] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
   const comparisonMutation = useCreateComparison();
+  const checkoutSessionId = new URLSearchParams(window.location.search).get('session_id');
+  const checkoutSessionParams = { sessionId: checkoutSessionId ?? '' };
+  const checkoutSession = useGetBillingCheckoutSession(
+    checkoutSessionParams,
+    {
+      query: {
+        queryKey: getGetBillingCheckoutSessionQueryKey(checkoutSessionParams),
+        enabled: Boolean(checkoutSessionId),
+        retry: false,
+      },
+    },
+  );
+  const [billingError, setBillingError] = useState(false);
+  const checkoutMutation = useCreateBillingCheckout({
+    mutation: {
+      onSuccess: ({ url }) => window.location.assign(url),
+      onError: () => setBillingError(true),
+    },
+  });
+  const hasActivePro =
+    checkoutSession.data?.status === 'complete' &&
+    ['active', 'trialing'].includes(checkoutSession.data.subscriptionStatus ?? '');
+
+  const startCheckout = () => {
+    setBillingError(false);
+    checkoutMutation.mutate();
+  };
 
   const updateVendor = (id: number, field: keyof VendorQuote, value: string) => {
     setVendors((current) =>
@@ -696,6 +729,25 @@ function Home() {
             </div>
           </div>
           <div className="flex items-center gap-space-sm shrink-0">
+            <button
+              type="button"
+              onClick={startCheckout}
+              disabled={checkoutMutation.isPending || hasActivePro}
+              data-testid="button-farrez-pro"
+              title={billingError ? 'Stripe Checkout is temporarily unavailable.' : 'Farrez Pro — 14.997 KWD monthly'}
+              className="flex items-center gap-space-xs bg-primary/15 hover:bg-primary/25 disabled:hover:bg-primary/15 px-space-sm py-1.5 rounded-full text-primary transition-colors disabled:cursor-default"
+            >
+              <CreditCard size={15} />
+              <span className="font-label-sm text-label-sm font-semibold whitespace-nowrap">
+                {checkoutMutation.isPending
+                  ? 'Opening…'
+                  : billingError
+                    ? 'Try Again'
+                    : hasActivePro
+                      ? 'Pro Active'
+                      : 'Farrez Pro'}
+              </span>
+            </button>
             <div className="flex items-center gap-space-xs bg-surface-container-high/90 px-space-sm py-1 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
               <span className="font-label-sm text-label-sm text-secondary font-semibold tracking-wider">KWD</span>

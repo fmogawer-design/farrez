@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: comparisons
     description: Vendor quotation comparison operations
+  - name: billing
+    description: Farrez Pro subscription operations
 paths:
   /healthz:
     get:
@@ -69,6 +71,55 @@ paths:
           description: Invalid comparison identifier
         "404":
           description: Comparison not found
+  /billing/plan:
+    get:
+      operationId: getBillingPlan
+      tags: [billing]
+      summary: Get the active Farrez Pro subscription plan
+      responses:
+        "200":
+          description: Active subscription plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingPlan"
+        "404":
+          description: Farrez Pro plan not found
+  /billing/checkout:
+    post:
+      operationId: createBillingCheckout
+      tags: [billing]
+      summary: Create a Stripe Checkout Session for Farrez Pro
+      responses:
+        "201":
+          description: Checkout Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutSession"
+        "404":
+          description: Farrez Pro plan not found
+  /billing/checkout-session:
+    get:
+      operationId: getBillingCheckoutSession
+      tags: [billing]
+      summary: Verify a Stripe Checkout Session after redirect
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "200":
+          description: Checkout Session status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutSessionStatus"
+        "400":
+          description: Invalid session identifier
 components:
   schemas:
     HealthStatus:
@@ -152,4 +203,55 @@ components:
         - id
         - vendors
         - createdAt
+    BillingPlan:
+      type: object
+      properties:
+        productId:
+          type: string
+        priceId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        unitAmount:
+          type: integer
+          description: Amount in Stripe's minor currency unit.
+        currency:
+          type: string
+        interval:
+          type: string
+          enum: [month]
+      required:
+        - productId
+        - priceId
+        - name
+        - description
+        - unitAmount
+        - currency
+        - interval
+    CheckoutSession:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+      required:
+        - url
+    CheckoutSessionStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [open, complete, expired]
+        paymentStatus:
+          type: string
+          enum: [paid, unpaid, no_payment_required]
+        subscriptionStatus:
+          type: string
+          nullable: true
+      required:
+        - status
+        - paymentStatus
+        - subscriptionStatus
 

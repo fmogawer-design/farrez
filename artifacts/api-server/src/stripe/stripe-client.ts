@@ -53,7 +53,7 @@ async function getStripeCredentials(): Promise<{
 
   return {
     secretKey,
-    webhookSecret: settings.webhook_secret,
+    webhookSecret: settings?.webhook_secret,
   };
 }
 

@@ -1,7 +1,8 @@
 import { getUncachableStripeClient } from "./stripe-client";
 
 const PLAN_KEY = "pro";
-const UNIT_AMOUNT = 14_997;
+const UNIT_AMOUNT = 5_500;
+const CURRENCY = "aed";
 
 async function seedFarrezPro(): Promise<void> {
   const stripe = await getUncachableStripeClient();
@@ -25,7 +26,7 @@ async function seedFarrezPro(): Promise<void> {
   });
   const matchingPrice = prices.data.find(
     (price) =>
-      price.currency === "kwd" &&
+      price.currency === CURRENCY &&
       price.unit_amount === UNIT_AMOUNT &&
       price.recurring?.interval === "month",
   );
@@ -34,7 +35,7 @@ async function seedFarrezPro(): Promise<void> {
     matchingPrice ??
     (await stripe.prices.create({
       product: product.id,
-      currency: "kwd",
+      currency: CURRENCY,
       unit_amount: UNIT_AMOUNT,
       recurring: { interval: "month" },
       metadata: { farrez_plan: PLAN_KEY },

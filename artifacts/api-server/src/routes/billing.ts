@@ -11,6 +11,10 @@ import { getUncachableStripeClient } from "../stripe/stripe-client";
 const router: IRouter = Router();
 
 function appOrigin(req: Request): string {
+  const domain = process.env["REPLIT_DOMAINS"]?.split(",")[0];
+  if (domain) {
+    return `https://${domain}`;
+  }
   return `${req.protocol}://${req.get("host")}`;
 }
 

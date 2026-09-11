@@ -48,7 +48,7 @@ export async function getFarrezProPlan(): Promise<FarrezPlan | null> {
     WHERE p.active = true
       AND pr.active = true
       AND p.metadata->>'farrez_plan' = 'pro'
-      AND pr.currency = 'kwd'
+      AND pr.currency = 'aed'
     LIMIT 1
   `);
 

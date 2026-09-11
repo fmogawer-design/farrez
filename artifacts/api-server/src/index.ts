@@ -30,7 +30,9 @@ async function initializeStripe(): Promise<void> {
   await runMigrations({ databaseUrl });
   const stripeSync = await getStripeSync();
   const webhookUrl = `https://${domains.split(",")[0]}/api/stripe/webhook`;
-  await stripeSync.findOrCreateManagedWebhook(webhookUrl);
+  await stripeSync.findOrCreateManagedWebhook(webhookUrl, {
+    enabled_events: ["*"],
+  });
   await stripeSync.syncBackfill();
   logger.info("Stripe synchronization initialized");
 }

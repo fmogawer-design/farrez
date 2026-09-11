@@ -734,7 +734,7 @@ function Home() {
               onClick={startCheckout}
               disabled={checkoutMutation.isPending || hasActivePro}
               data-testid="button-farrez-pro"
-              title={billingError ? 'Stripe Checkout is temporarily unavailable.' : 'Farrez Pro — 14.997 KWD monthly'}
+              title={billingError ? 'Stripe Checkout is temporarily unavailable.' : 'Farrez Pro — 55 AED monthly'}
               className="flex items-center gap-space-xs bg-primary/15 hover:bg-primary/25 disabled:hover:bg-primary/15 px-space-sm py-1.5 rounded-full text-primary transition-colors disabled:cursor-default"
             >
               <CreditCard size={15} />

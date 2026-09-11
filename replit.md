@@ -16,6 +16,8 @@ Farrez compares two or three vendor quotations and recommends the lowest-total-c
 - Frontend: React + Vite with TanStack Query and generated API hooks
 - API: Express 5 on Node.js
 - Database: MongoDB through Mongoose
+- Billing: Stripe Checkout and managed webhooks
+- Stripe synchronization: PostgreSQL through `stripe-replit-sync`
 
 ## Where things live
 
@@ -26,11 +28,15 @@ Farrez compares two or three vendor quotations and recommends the lowest-total-c
 - `artifacts/api-server/src/routes/comparisons.ts` — comparison persistence and retrieval endpoints
 - `artifacts/api-server/src/models/comparison.ts` — MongoDB comparison model
 - `artifacts/api-server/src/lib/compare-vendors.ts` — server-owned recommendation rules
+- `artifacts/api-server/src/routes/billing.ts` — Farrez Pro plan, Checkout, and post-checkout verification
+- `artifacts/api-server/src/stripe/` — Stripe connection, webhook, and PostgreSQL synchronization code
+- `scripts/src/seed-farrez-pro.ts` — idempotent Farrez Pro product and price setup
 - `lib/api-spec/openapi.yaml` — Farrez API contract
 
 ## Architecture decisions
 
 - Comparisons are calculated by the Express API and persisted in MongoDB.
+- Stripe-owned billing records are synchronized to PostgreSQL; quotation data remains exclusively in MongoDB.
 - The frontend uses the generated API client rather than duplicating network request code.
 - Recommendation order is total cost first, then faster delivery for equal totals.
 - The Compare and Results views follow the supplied Google Stitch exports rather than a custom reinterpretation.
@@ -41,12 +47,13 @@ Farrez compares two or three vendor quotations and recommends the lowest-total-c
 - Calculate total cost from quoted price plus additional fees.
 - Compare cost, fees, delivery, and payment terms.
 - Show lowest cost, fastest delivery, and the recommended vendor.
+- Offer Farrez Pro as a 55 AED monthly Stripe subscription through hosted Checkout.
 
 ## User preferences
 
 - Preserve the supplied Stitch visual design exactly unless explicitly asked to redesign it.
 - Keep MongoDB persistence limited to quotation comparisons unless explicitly asked to add history features.
-- Do not add authentication, payments, uploads, supplier history, or unrelated features in the core release.
+- Do not add authentication, uploads, supplier history, or unrelated features in the core release.
 
 ## Gotchas
 

@@ -165,8 +165,8 @@ importers:
         specifier: ^22.6.2
         version: 22.6.2(@types/node@25.9.6)
       stripe-replit-sync:
-        specifier: ^1.0.0
-        version: 1.0.0(stripe@22.6.2(@types/node@25.9.6))
+        specifier: ^0.0.12
+        version: 0.0.12(stripe@22.6.2(@types/node@25.9.6))
     devDependencies:
       prettier:
         specifier: ^3.9.6
@@ -2991,8 +2991,8 @@ packages:
     resolution: {integrity: sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw==}
     engines: {node: '>=14.16'}
 
-  stripe-replit-sync@1.0.0:
-    resolution: {integrity: sha512-Bkbih3k+IX/GugN8bKWNpwDiI2xkSLOAR+P34W7pjaR8fXyVay/QqztbrvbHZcU1JlfXncmBhuODY5TYY6DXlw==}
+  stripe-replit-sync@0.0.12:
+    resolution: {integrity: sha512-zUn077vkcYnCie5VP1AfS8QlB+ZGgPp49gPC+NxH5gSHjdSLjaxJ/poBS7SYByPuZWpGo6QMoNf4kzPMMaSP7g==}
     peerDependencies:
       stripe: '> 11'
 
@@ -5630,7 +5630,7 @@ snapshots:
 
   strip-json-comments@5.0.3: {}
 
-  stripe-replit-sync@1.0.0(stripe@22.6.2(@types/node@25.9.6)):
+  stripe-replit-sync@0.0.12(stripe@22.6.2(@types/node@25.9.6)):
     dependencies:
       pg: 8.23.0
       pg-node-migrations: 0.0.8

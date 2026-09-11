@@ -1,1 +1,2 @@
 - [Atlas TLS alert 80](atlas-tls-alert-80.md) — on shared clusters, this pre-auth TLS failure can mean the actual Replit egress IP is absent from Atlas Network Access.
+- [Stripe sync migration assets](stripe-sync-migration-assets.md) — keep the sync library external to the API bundle so its runtime SQL migrations remain available.

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Farrez"
+description = "A focused vendor quotation comparison tool for finance and procurement teams. Enter two or three quotations, compare total cost and delivery speed, and get a clear recommendation."
+version = "1.0.0"
+id = "artifacts/farrez"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23485
+
+[services.development]
+run = "pnpm --filter @workspace/farrez run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/farrez", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/farrez/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23485"
+BASE_PATH = "/"
